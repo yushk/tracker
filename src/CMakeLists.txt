@@ -1,30 +1,34 @@
-#Set minimum version requered
-cmake_minimum_required(VERSION 2.4.6)
-#just to avoid the warning
-if(COMMAND cmake_policy)
-     cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
-#set project name
-project(TLD)
-#Append path to the module path
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
-#OpenCV
+# cmake needs this line
+cmake_minimum_required(VERSION 2.8)
+
+# Define project name
+project(opencv_example_project)
+
+# Find OpenCV, you may need to set OpenCV_DIR variable
+# to the absolute path to the directory containing OpenCVConfig.cmake file
+# via the command line or GUI
 find_package(OpenCV REQUIRED)
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../lib)
+
+# If the package has been found, several variables will
+# be set, you can find the full list with descriptions
+# in the OpenCVConfig.cmake file.
+# Print some message showing some of them
+message(STATUS "OpenCV library status:")
+message(STATUS "    version: ${OpenCV_VERSION}")
+message(STATUS "    libraries: ${OpenCV_LIBS}")
+message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
+
+if(CMAKE_VERSION VERSION_LESS "2.8.11")
+  # Add OpenCV headers location to your include paths
+  include_directories(${OpenCV_INCLUDE_DIRS})
+endif()
 #set the include directories
 include_directories (${PROJECT_SOURCE_DIR}/../include	${OpenCV_INCLUDE_DIRS})
+#set the default path for built executables to the "bin" directory
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)
 #libraries
-add_library(tld_utils tld_utils.cpp)
-add_library(LKTracker LKTracker.cpp)
-add_library(ferNN FerNNClassifier.cpp)
-add_library(tld TLD.cpp)
-#executables
-add_executable(run_tld run_tld.cpp)
-#link the libraries
-target_link_libraries(run_tld tld LKTracker ferNN tld_utils ${OpenCV_LIBS})
-#set optimization level 
-set(CMAKE_BUILD_TYPE Release)
-
+add_library(utils utils.cpp)
+# Declare the executable target built from your sources
+add_executable(tracker main.cpp)
+# Link your application with OpenCV libraries
+target_link_libraries(tracker utils ${OpenCV_LIBS})
