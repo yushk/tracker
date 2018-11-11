@@ -6,6 +6,7 @@
 #include <opencv2/tracking/tracker.hpp>
 #include <iostream>
 #include <utils.h>
+#include <sys/time.h> 
 
 using namespace cv;
 using namespace std;
@@ -36,6 +37,12 @@ string video;
 //   int h = atoi(y2.c_str())-y;// = (int)file["bb_h"];
 //   box = Rect(x,y,w,h);
 // }
+int64_t getCurrentTime()      //直接调用这个函数就行了，返回值最好是int64_t，long long应该也可以
+  {    
+      struct timeval tv;    
+      gettimeofday(&tv,NULL);    //该函数在sys/time.h头文件中
+      return tv.tv_sec * 1000 + tv.tv_usec / 1000;    
+  } 
 //bounding box mouse callback
 void mouseHandler(int event, int x, int y, int flags, void *param){
   switch( event ){
@@ -126,8 +133,8 @@ int main(int argc, char * argv[])
     return 1;
   }
   //Register mouse callback to draw the bounding box
-  cvNamedWindow("TLD",CV_WINDOW_AUTOSIZE);
-  cvSetMouseCallback( "TLD", mouseHandler, NULL );
+  cvNamedWindow("MIL",CV_WINDOW_AUTOSIZE);
+  cvSetMouseCallback( "MIL", mouseHandler, NULL );
     Mat frame;
   Mat last_gray;
   Mat first;
@@ -150,7 +157,7 @@ GETBOUNDINGBOX:
       first.copyTo(frame);
     cvtColor(frame, last_gray, CV_RGB2GRAY);
     drawBox(frame,box);
-    imshow("TLD", frame);
+    imshow("MIL", frame);
     if (cvWaitKey(33) == 'q')
 	    return 0;
   }
@@ -160,11 +167,11 @@ GETBOUNDINGBOX:
       goto GETBOUNDINGBOX;
   }
   //Remove callback
-  cvSetMouseCallback( "TLD", NULL, NULL );
-  printf("Initial Bounding Box = x:%d y:%d h:%d w:%d\n",box.x,box.y,box.width,box.height);
+  cvSetMouseCallback( "MIL", NULL, NULL );
+  printf("Initial Bounding Box = x:%f y:%f h:%f w:%f\n",box.x,box.y,box.width,box.height);
 // can change to BOOSTING, MIL, KCF (OpenCV 3.1), TLD, MEDIANFLOW, or GOTURN (OpenCV 3.2)
     //使用TrackerMIL跟踪
-Ptr<Tracker> tracker= Tracker::create("MIL");
+Ptr<Tracker> tracker= Tracker::create("KCF");
 //Ptr<TrackerTLD> tracker= TrackerTLD::create();
 //Ptr<TrackerKCF> tracker = TrackerKCF::create();
 //Ptr<TrackerMedianFlow> tracker = TrackerMedianFlow::create();
@@ -179,27 +186,16 @@ REPEAT:
     //get frame
     // cvtColor(frame, current_gray, CV_RGB2GRAY);
     // //Process Frame
-    // tld.processFrame(last_gray,current_gray,pts1,pts2,pbox,status,tl,bb_file);
-    // //Draw Points
-    // if (status){
-    //   drawPoints(frame,pts1);
-    //   drawPoints(frame,pts2,Scalar(0,255,0));
-    //   drawBox(frame,pbox);
-    //   detections++;
-    // }
-    //Display
+    std::cout<<"nowTime: "<<getCurrentTime()<<"\n"; 
+
     tracker->update(frame,box);
     drawBox(frame,box);
-    drawBox(frame,oribox);
-    
+    // drawBox(frame,oribox);
+    // printf("update Bounding Box = x:%f y:%f h:%f w:%f\n",box.x,box.y,box.width,box.height);
     drawText(frame);
-    imshow("TLD", frame);
-    //swap points and images
+    //Display
+    imshow("MIL", frame);
     // swap(last_gray,current_gray);
-    // pts1.clear();
-    // pts2.clear();
-    // frames++;
-    // printf("Detection rate: %d/%d\n",detections,frames);
     if (cvWaitKey(33) == 'q')
       break;
   }
@@ -215,27 +211,6 @@ REPEAT:
   }
   fclose(bb_file);
   return 0;
-
-    // if(capture.isOpened()){
-    //     cout << "Capture is opened" << endl;
-    //     for(;;)
-    //     {
-    //         capture >> image;
-    //         if(image.empty())
-    //             break;
-    //         drawText(image);
-    //         imshow("Sample", image);
-    //         if(waitKey(10) >= 0)
-    //             break;
-    //     }
-    // }else{
-    //     cout << "No capture" << endl;
-    //     image = Mat::zeros(480, 640, CV_8UC1);
-    //     drawText(image);
-    //     imshow("Sample", image);
-    //     waitKey(0);
-    // }
-    // return 0;
 }
 
 
