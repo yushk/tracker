@@ -1,4 +1,0 @@
-/home/pana/海事/tracker/tracker3.1/bin/CMakeFiles/edit_cache.dir
-/home/pana/海事/tracker/tracker3.1/bin/CMakeFiles/tracker.dir
-/home/pana/海事/tracker/tracker3.1/bin/CMakeFiles/rebuild_cache.dir
-/home/pana/海事/tracker/tracker3.1/bin/CMakeFiles/utils.dir
